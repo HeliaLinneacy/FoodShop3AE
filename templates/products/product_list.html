@@ -71,17 +71,19 @@
         border-radius: 2px;
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
         margin-bottom: 15px;
     }
     .sort-bar span {
-        margin-right: 15px;
+        margin-right: 10px;
         color: #555;
+        white-space: nowrap;
     }
     .sort-btn {
         background: #fff;
         border: 0;
         padding: 8px 15px;
-        margin-right: 10px;
         border-radius: 2px;
         color: #000;
     }
@@ -112,24 +114,95 @@
         color: var(--shopee-red);
         margin-right: 6px;
     }
+
+    /* Mobile-specific styles */
+    @media (max-width: 767px) {
+        .sort-bar {
+            padding: 10px 12px;
+            gap: 4px;
+        }
+        .sort-bar span {
+            width: 100%;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+        .sort-bar form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            width: 100%;
+        }
+        .sort-btn {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+        .mobile-filter-toggle {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px 15px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+        .mobile-filter-toggle:focus { outline: none; box-shadow: none; }
+        .filter-content-mobile {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+        }
+    }
 </style>
 
 <div class="row">
     <!-- Sidebar / Filters -->
     <div class="col-md-2 mb-4">
-        <div class="mb-4">
-            <div class="filter-header"><i class="fa-solid fa-filter me-2"></i> BỘ LỌC TÌM KIẾM</div>
-        </div>
-        
-        <div class="mb-4">
-            <div class="filter-header">Theo Danh Mục</div>
-            <div class="filter-list">
-                <a href="{% url 'products:product_list' %}" class="{% if not request.GET.category %}active{% endif %}">Tất Cả Sản Phẩm</a>
-                {% for cat in categories %}
-                    <a href="?category={{ cat.id }}" class="{% if request.GET.category == cat.id|stringformat:'s' %}active{% endif %}">{{ cat.name }}</a>
-                {% endfor %}
+
+        <!-- Mobile: Nút toggle thu gọn (chỉ hiện trên mobile) -->
+        <div class="d-md-none">
+            <button class="mobile-filter-toggle" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#filterSidebar" aria-expanded="false">
+                <span><i class="fa-solid fa-filter me-2 text-shopee"></i> BỘ LỌC TÌM KIẾM</span>
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="collapse" id="filterSidebar">
+                <div class="filter-content-mobile">
+                    <div class="filter-header">Theo Danh Mục</div>
+                    <div class="filter-list">
+                        <a href="{% url 'products:product_list' %}" class="{% if not request.GET.category %}active{% endif %}">Tất Cả Sản Phẩm</a>
+                        {% for cat in categories %}
+                            <a href="?category={{ cat.id }}" class="{% if request.GET.category == cat.id|stringformat:'s' %}active{% endif %}">{{ cat.name }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Desktop: Hiện thị bình thường (chỉ hiện trên máy tính) -->
+        <div class="d-none d-md-block">
+            <div class="mb-4">
+                <div class="filter-header"><i class="fa-solid fa-filter me-2"></i> BỘ LỌC TÌM KIẾM</div>
+            </div>
+            <div class="mb-4">
+                <div class="filter-header">Theo Danh Mục</div>
+                <div class="filter-list">
+                    <a href="{% url 'products:product_list' %}" class="{% if not request.GET.category %}active{% endif %}">Tất Cả Sản Phẩm</a>
+                    {% for cat in categories %}
+                        <a href="?category={{ cat.id }}" class="{% if request.GET.category == cat.id|stringformat:'s' %}active{% endif %}">{{ cat.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Product Grid -->
