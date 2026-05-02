@@ -35,6 +35,16 @@ ALLOWED_HOSTS = [
     'www.nguyenducthang.id.vn',
 ]
 
+# Fix lỗi CSRF 403 Forbidden khi dùng custom domain (Django 4.0+)
+CSRF_TRUSTED_ORIGINS = [
+    'https://www.nguyenducthang.id.vn',
+    'http://www.nguyenducthang.id.vn',
+    'https://nguyenducthang.id.vn',
+    'http://nguyenducthang.id.vn',
+    'https://*.railway.app',
+    'http://*.railway.app',
+]
+
 
 # Application definition
 
