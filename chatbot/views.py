@@ -348,6 +348,7 @@ def get_bot_response(message: str, user) -> str:
             'pending': '⏳ Chờ xử lý',
             'approved': '✅ Đã duyệt',
             'shipped': '🚚 Đang giao',
+            'delivered': '📦 Đã giao hàng',
             'cancelled': '❌ Đã hủy',
         }
         result = f"📦 **{len(orders)} đơn hàng gần nhất của bạn:**\n\n"

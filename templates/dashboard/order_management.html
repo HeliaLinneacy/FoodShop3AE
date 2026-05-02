@@ -38,6 +38,9 @@
     <a href="?status=shipped" class="filter-tab {% if status_filter == 'shipped' %}active{% endif %}">
         🚚 Đang giao
     </a>
+    <a href="?status=delivered" class="filter-tab {% if status_filter == 'delivered' %}active{% endif %}">
+        📦 Đã giao hàng
+    </a>
     <a href="?status=cancelled" class="filter-tab {% if status_filter == 'cancelled' %}active{% endif %}">
         ❌ Đã hủy
     </a>
@@ -87,7 +90,9 @@
                             {% elif order.status == 'approved' %}
                                 <span class="badge bg-info status-badge">✅ Đã Duyệt</span>
                             {% elif order.status == 'shipped' %}
-                                <span class="badge bg-success status-badge">🚚 Đang Giao</span>
+                                <span class="badge bg-primary status-badge">🚚 Đang Giao</span>
+                            {% elif order.status == 'delivered' %}
+                                <span class="badge bg-success status-badge">📦 Đã Giao Hàng</span>
                             {% elif order.status == 'cancelled' %}
                                 <span class="badge bg-danger status-badge">❌ Đã Hủy</span>
                             {% endif %}

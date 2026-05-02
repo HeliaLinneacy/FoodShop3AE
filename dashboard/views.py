@@ -9,7 +9,7 @@ from django.db.models import Sum
 @staff_member_required
 def dashboard_home(request):
     total_orders = Order.objects.count()
-    total_revenue = Order.objects.filter(status='shipped').aggregate(Sum('totalAmount'))['totalAmount__sum'] or 0
+    total_revenue = Order.objects.filter(status='delivered').aggregate(Sum('totalAmount'))['totalAmount__sum'] or 0
     total_products = Snack.objects.count()
     total_users = User.objects.filter(role='customer').count()
     
@@ -34,7 +34,8 @@ def order_management(request):
     STATUS_LABELS = {
         'pending': ('Chờ Xử Lý', 'warning'),
         'approved': ('Đã Duyệt', 'info'),
-        'shipped': ('Đang Giao', 'success'),
+        'shipped': ('Đang Giao', 'primary'),
+        'delivered': ('Đã Giao Hàng', 'success'),
         'cancelled': ('Đã Hủy', 'danger'),
     }
 

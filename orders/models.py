@@ -7,6 +7,7 @@ class Order(models.Model):
         ('pending', 'Chờ xử lý'),
         ('approved', 'Đã duyệt'),
         ('shipped', 'Đang giao'),
+        ('delivered', 'Đã giao hàng'),
         ('cancelled', 'Đã hủy'),
     )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders', verbose_name="Người dùng")
