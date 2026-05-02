@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load humanize custom_filters %}
+
+{% block content %}
+<style>
+    .shopee-card {
+        border: 1px solid transparent;
+        transition: transform 0.1s, border 0.1s, box-shadow 0.1s;
+        background: #fff;
+        text-decoration: none;
+        color: #000;
+        display: block;
+    }
+    .shopee-card:hover {
+        transform: translateY(-1px);
+        border: 1px solid var(--shopee-red);
+        box-shadow: 0 0.0625rem 20px 0 rgba(0,0,0,.05);
+    }
+    .shopee-img-wrapper {
+        position: relative;
+        width: 100%;
+        padding-top: 100%; /* 1:1 Aspect Ratio */
+    }
+    .shopee-img-wrapper img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .shopee-mall-badge {
+        background-color: #d0011b;
+        color: white;
+        font-size: 10px;
+        padding: 2px 4px;
+        border-radius: 2px;
+        margin-right: 4px;
+        font-weight: 500;
+    }
+    .shopee-title {
+        font-size: 12px;
+        line-height: 14px;
+        height: 28px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        margin-top: 8px;
+        margin-bottom: 4px;
+        padding: 0 8px;
+    }
+    .shopee-price-row {
+        padding: 0 8px 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .shopee-price {
+        color: var(--shopee-red);
+        font-size: 16px;
+    }
+    .shopee-sold {
+        font-size: 12px;
+        color: rgba(0,0,0,.54);
+    }
+    .sort-bar {
+        background: #ededed;
+        padding: 13px 20px;
+        border-radius: 2px;
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .sort-bar span {
+        margin-right: 15px;
+        color: #555;
+    }
+    .sort-btn {
+        background: #fff;
+        border: 0;
+        padding: 8px 15px;
+        margin-right: 10px;
+        border-radius: 2px;
+        color: #000;
+    }
+    .sort-btn.active {
+        background: var(--shopee-red);
+        color: #fff;
+    }
+    .filter-header {
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        font-size: 14px;
+        color: #000;
+    }
+    .filter-list a {
+        color: rgba(0,0,0,.8);
+        font-size: 14px;
+        display: block;
+        padding: 8px 0;
+        text-decoration: none;
+    }
+    .filter-list a.active {
+        color: var(--shopee-red);
+        font-weight: bold;
+    }
+    .filter-list a.active::before {
+        content: '\25B8';
+        color: var(--shopee-red);
+        margin-right: 6px;
+    }
+</style>
+
+<div class="row">
+    <!-- Sidebar / Filters -->
+    <div class="col-md-2 mb-4">
+        <div class="mb-4">
+            <div class="filter-header"><i class="fa-solid fa-filter me-2"></i> BỘ LỌC TÌM KIẾM</div>
+        </div>
+        
+        <div class="mb-4">
+            <div class="filter-header">Theo Danh Mục</div>
+            <div class="filter-list">
+                <a href="{% url 'products:product_list' %}" class="{% if not request.GET.category %}active{% endif %}">Tất Cả Sản Phẩm</a>
+                {% for cat in categories %}
+                    <a href="?category={{ cat.id }}" class="{% if request.GET.category == cat.id|stringformat:'s' %}active{% endif %}">{{ cat.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="col-md-10">
+        <!-- Sort Bar -->
+        <div class="sort-bar">
+            <span class="me-3">Sắp xếp theo</span>
+            <form action="{% url 'products:product_list' %}" method="get" class="d-flex align-items-center mb-0 w-100" id="sortForm">
+                {% if request.GET.q %}
+                <input type="hidden" name="q" value="{{ request.GET.q }}">
+                {% endif %}
+                {% if request.GET.category %}
+                <input type="hidden" name="category" value="{{ request.GET.category }}">
+                {% endif %}
+                <button type="submit" name="sort" value="relevance" class="sort-btn {% if current_sort == 'relevance' %}active{% endif %}">Liên Quan</button>
+                <button type="submit" name="sort" value="newest" class="sort-btn {% if current_sort == 'newest' %}active{% endif %}">Mới Nhất</button>
+                <button type="submit" name="sort" value="bestselling" class="sort-btn {% if current_sort == 'bestselling' %}active{% endif %}">Bán Chạy</button>
+                
+                <select name="sort" class="sort-btn" style="border: 1px solid rgba(0,0,0,.09);" onchange="document.getElementById('sortForm').submit();">
+                    <option value="" disabled {% if current_sort != 'price_asc' and current_sort != 'price_desc' %}selected{% endif %}>Giá</option>
+                    <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Giá: Thấp đến Cao</option>
+                    <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Giá: Cao đến Thấp</option>
+                </select>
+            </form>
+        </div>
+
+        <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-2">
+            {% for snack in snacks %}
+                <div class="col">
+                    <a href="{% url 'products:product_detail' snack.id %}" class="shopee-card h-100">
+                        <div class="shopee-img-wrapper">
+                            {% if snack.image %}
+                                <img src="{{ snack.image }}" alt="{{ snack.snackName }}">
+                            {% else %}
+                                <div class="bg-light text-center text-muted d-flex align-items-center justify-content-center h-100 position-absolute w-100 top-0 start-0">
+                                    <i class="fa-solid fa-image fa-2x mb-2"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="shopee-title">
+                            {{ snack.snackName }}
+                        </div>
+                        <div class="shopee-price-row">
+                            <span class="shopee-price">{{ snack.price|dot_thousands }} ₫</span>
+                            <span class="shopee-sold">Đã bán {{ snack.soldCount|intcomma }}</span>
+                        </div>
+                    </a>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">Không tìm thấy sản phẩm nào.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

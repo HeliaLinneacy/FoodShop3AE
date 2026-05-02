@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load humanize custom_filters %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white pb-0 border-bottom-0 pt-4 px-4">
+                <h4 class="fw-bold">Thông Tin Giao Hàng</h4>
+            </div>
+            <div class="card-body p-4">
+                <form action="{% url 'orders:checkout' %}" method="post" id="checkoutForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="receiverName" class="form-label">Họ và Tên</label>
+                        <input type="text" class="form-control" id="receiverName" name="receiverName" value="{{ request.user.fullName|default:request.user.username }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phoneNumber" class="form-label">Số Điện Thoại</label>
+                        <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" value="{{ request.user.phoneNumber }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Địa Chỉ Giao Hàng</label>
+                        <textarea class="form-control" id="address" name="address" rows="3" required>{{ request.user.address }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="note" class="form-label">Ghi Chú Đơn Hàng (Tùy chọn)</label>
+                        <textarea class="form-control" id="note" name="note" rows="2"></textarea>
+                    </div>
+                    
+                    <h5 class="fw-bold mt-4 mb-3">Phương Thức Thanh Toán</h5>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="paymentCOD" value="COD" checked>
+                        <label class="form-check-label" for="paymentCOD">
+                            Thanh Toán Khi Nhận Hàng (COD)
+                        </label>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white pb-0 border-bottom-0 pt-4 px-4">
+                <h5 class="fw-bold">Đơn Hàng Của Bạn</h5>
+            </div>
+            <div class="card-body p-4">
+                <ul class="list-group list-group-flush mb-3">
+                    {% for item in cart.items.all %}
+                    <li class="list-group-item d-flex justify-content-between lh-sm px-0">
+                        <div>
+                            <h6 class="my-0">{{ item.snack.snackName }}</h6>
+                            <small class="text-muted">SL: {{ item.quantity }}</small>
+                        </div>
+                        <span class="text-muted">{{ item.totalPrice|dot_thousands }} ₫</span>
+                    </li>
+                    {% endfor %}
+                    <li class="list-group-item d-flex justify-content-between px-0 bg-light">
+                        <span class="fw-bold">Tổng Cộng</span>
+                        <strong class="text-orange">{{ cart.totalAmount|dot_thousands }} ₫</strong>
+                    </li>
+                </ul>
+                <button type="submit" form="checkoutForm" class="btn w-100 py-2 fw-bold text-white" style="background-color: #00a8ff; border: none; border-radius: 2px;">Đặt Hàng</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

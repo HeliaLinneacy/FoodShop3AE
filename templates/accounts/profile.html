@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm text-center">
+            <div class="card-body py-5">
+                <i class="fa-solid fa-user-circle fa-5x text-orange mb-3"></i>
+                <h4 class="fw-bold">{{ user.username }}</h4>
+                <p class="text-muted">{{ user.email }}</p>
+                <span class="badge bg-primary">{{ user.get_role_display }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white pb-0 border-bottom-0 pt-4 px-4">
+                <h5 class="fw-bold">Thông Tin Tài Khoản</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="row mb-3 align-items-center">
+                            <div class="col-sm-3">
+                                <label for="{{ field.id_for_label }}" class="mb-0 text-muted">{{ field.label }}</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="text" name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}" value="{{ field.value|default:'' }}" {% if field.field.required %}required{% endif %}>
+                                {% for error in field.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <hr>
+                    {% endfor %}
+                    
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-orange px-4">Lưu Thay Đổi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

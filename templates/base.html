@@ -1,0 +1,206 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ba Anh Em Shop</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --shopee-red: #ee4d2d;
+            --shopee-hover: #f05d40;
+            --shopee-bg: #f5f5f5;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: var(--shopee-bg);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 14px;
+        }
+        main {
+            flex: 1;
+        }
+        .bg-shopee {
+            background-color: var(--shopee-red) !important;
+        }
+        .text-shopee {
+            color: var(--shopee-red) !important;
+        }
+        .btn-shopee {
+            background-color: var(--shopee-red);
+            color: white;
+            border: none;
+        }
+        .btn-shopee:hover {
+            background-color: var(--shopee-hover);
+            color: white;
+        }
+        /* Top Navbar (small) */
+        .navbar-top {
+            background-color: #f53d2d; /* slightly darker/different red if needed, or same */
+            background: linear-gradient(-180deg,#f53d2d,#f63);
+            font-size: 13px;
+        }
+        .navbar-top a {
+            color: white;
+            text-decoration: none;
+            padding: 0 8px;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+        .navbar-top a:last-child {
+            border-right: none;
+        }
+        .navbar-top a:hover {
+            opacity: 0.8;
+        }
+        
+        /* Main Navbar */
+        .navbar-main {
+            background: linear-gradient(-180deg,#f53d2d,#f63);
+            padding-bottom: 16px;
+            padding-top: 16px;
+        }
+        .shopee-logo {
+            font-size: 32px;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        .shopee-logo i {
+            font-size: 40px;
+            margin-right: 10px;
+        }
+        
+        .search-container {
+            background: white;
+            border-radius: 2px;
+            padding: 3px;
+            display: flex;
+            flex-grow: 1;
+            max-width: 800px;
+            margin: 0 40px;
+        }
+        .search-container input {
+            border: none;
+            box-shadow: none;
+            flex-grow: 1;
+            padding: 0 15px;
+        }
+        .search-container input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+        .search-container button {
+            background-color: var(--shopee-red);
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 2px;
+        }
+        
+        .cart-icon {
+            color: white;
+            font-size: 24px;
+            position: relative;
+            text-decoration: none;
+        }
+        .cart-icon:hover {
+            color: white;
+            opacity: 0.8;
+        }
+        
+        .container {
+            max-width: 1200px;
+        }
+        
+        /* Utility */
+        a { text-decoration: none; }
+    </style>
+</head>
+<body>
+    <!-- Top Navbar -->
+    <div class="navbar-top py-1 text-white">
+        <div class="container d-flex justify-content-between">
+            <div>
+                <a href="#" style="border-right: none;">Kết nối <i class="fa-brands fa-facebook"></i> <i class="fa-brands fa-instagram"></i></a>
+            </div>
+            <div>
+                <a href="#"><i class="fa-regular fa-bell"></i> Thông Báo</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:profile' %}"><i class="fa-regular fa-user"></i> {{ user.username }}</a>
+                    {% if user.role == 'admin' or user.is_staff %}
+                        <a href="{% url 'dashboard:home' %}">Quản Trị</a>
+                    {% endif %}
+                    <a href="{% url 'orders:order_history' %}">Đơn Mua</a>
+                    <form action="{% url 'accounts:logout' %}" method="post" class="d-inline m-0 p-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link text-white text-decoration-none p-0 m-0" style="font-size: 13px; border-right: none;">Đăng Xuất</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'accounts:register' %}">Đăng Ký</a>
+                    <a href="{% url 'accounts:login' %}">Đăng Nhập</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navbar -->
+    <div class="navbar-main">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a href="{% url 'products:product_list' %}" class="shopee-logo">
+                <i class="fa-solid fa-bag-shopping"></i>
+                <span class="fw-bold">Ba Anh Em Shop</span>
+            </a>
+            
+            <form action="{% url 'products:product_list' %}" method="get" class="search-container">
+                <input type="text" name="q" placeholder="Tìm kiếm đồ ăn vặt..." value="{{ request.GET.q }}">
+                <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </form>
+            
+            <div>
+                <a href="{% url 'cart:cart_detail' %}" class="cart-icon position-relative">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    {% if cart_item_count and cart_item_count > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-white text-shopee" style="font-size: 11px; padding: 3px 6px; border: 1px solid var(--shopee-red); transform: translate(-30%, 10%) !important;">
+                        {{ cart_item_count }}
+                    </span>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}
+        {% endblock content %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white text-center py-4 mt-auto border-top">
+        <div class="container text-muted" style="font-size: 12px;">
+            <p class="mb-1">&copy; 2026 Ba Anh Em Shop. Tất cả các quyền được bảo lưu.</p>
+            <p class="mb-0">Quốc gia & Khu vực: Việt Nam</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

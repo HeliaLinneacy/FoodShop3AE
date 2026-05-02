@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load humanize custom_filters %}
+
+{% block content %}
+<style>
+    /* Ẩn mũi tên mặc định của input type number */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+    .shopee-btn {
+        border-radius: 2px !important;
+        font-weight: 500;
+    }
+</style>
+<div class="row">
+    <div class="col-md-6 mb-4">
+        {% if snack.image %}
+            <img src="{{ snack.image }}" class="img-fluid rounded shadow-sm" alt="{{ snack.snackName }}">
+        {% else %}
+            <div class="bg-light text-center py-5 text-muted rounded shadow-sm" style="height: 400px; display: flex; align-items: center; justify-content: center;">
+                <div>
+                    <i class="fa-solid fa-image fa-5x mb-3"></i><br>Chưa Có Ảnh
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}" class="text-orange">Sản Phẩm</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}?category={{ snack.category.id }}" class="text-orange">{{ snack.category.name }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ snack.snackName }}</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-3" style="font-size: 20px;">{{ snack.snackName }}</h2>
+        
+        <div class="d-flex align-items-center mb-3 text-muted" style="font-size: 14px;">
+            <div class="me-3 pe-3 border-end">
+                <span class="text-orange border-bottom border-orange">{{ avg_rating }}</span>
+                {% for i in "12345" %}
+                    {% if forloop.counter <= avg_rating %}
+                        <i class="fa-solid fa-star text-orange"></i>
+                    {% else %}
+                        <i class="fa-regular fa-star text-orange"></i>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="me-3 pe-3 border-end">
+                <span class="text-dark border-bottom border-dark">{{ review_count }}</span> Đánh Giá
+            </div>
+            <div>
+                <span class="text-dark">{{ snack.soldCount|intcomma }}</span> Đã Bán
+            </div>
+        </div>
+
+        <div class="p-3 mb-4" style="background-color: #fafafa;">
+            <h3 class="text-orange fw-bold mb-0" style="font-size: 30px;">{{ snack.price|dot_thousands }} ₫</h3>
+        </div>
+        
+        <div class="row mb-4 align-items-center">
+            <div class="col-3 text-muted" style="font-size: 14px;">Vận Chuyển</div>
+            <div class="col-9" style="font-size: 14px;">
+                <i class="fa-solid fa-truck-fast text-success me-2"></i> Miễn phí vận chuyển
+            </div>
+        </div>
+
+        {% if snack.quantity > 0 %}
+        <form action="{% url 'cart:cart_add' snack.id %}" method="post">
+            {% csrf_token %}
+            
+            <div class="row mb-4 align-items-center">
+                <div class="col-3 text-muted" style="font-size: 14px;">Số Lượng</div>
+                <div class="col-9 d-flex align-items-center">
+                    <div class="input-group" style="width: 140px;">
+                        <button class="btn btn-outline-secondary rounded-0 px-3" type="button" onclick="this.parentNode.querySelector('input[type=number]').stepDown()">-</button>
+                        <input type="number" name="quantity" class="form-control text-center rounded-0 border-secondary border-opacity-50" value="1" min="1" max="{{ snack.quantity }}" style="border-left: none; border-right: none; box-shadow: none; font-size: 16px;">
+                        <button class="btn btn-outline-secondary rounded-0 px-3" type="button" onclick="this.parentNode.querySelector('input[type=number]').stepUp()">+</button>
+                    </div>
+                    <span class="ms-3 text-muted" style="font-size: 14px;">{{ snack.quantity }} sản phẩm có sẵn</span>
+                </div>
+            </div>
+
+            <div class="d-flex mt-4 pt-2">
+                <button type="submit" name="action" value="add_to_cart" class="btn btn-lg px-4 me-3 shopee-btn" style="color: var(--shopee-red); border: 1px solid var(--shopee-red); background: rgba(208, 1, 27, 0.08); font-size: 15px;">
+                    <i class="fa-solid fa-cart-plus me-2"></i> Thêm Vào Giỏ Hàng
+                </button>
+                <button type="submit" name="action" value="buy_now" class="btn btn-danger btn-lg px-5 shopee-btn" style="background-color: var(--shopee-red); border: none; font-size: 15px; min-width: 140px;">
+                    Mua Ngay
+                </button>
+            </div>
+        </form>
+        {% else %}
+        <div class="row mb-4 align-items-center">
+            <div class="col-3 text-muted" style="font-size: 14px;">Số Lượng</div>
+            <div class="col-9 text-muted" style="font-size: 14px;">
+                0 sản phẩm có sẵn
+            </div>
+        </div>
+        <button class="btn btn-secondary btn-lg px-5" disabled>Hết Hàng</button>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="fw-bold bg-light p-3 mb-4 rounded">MÔ TẢ SẢN PHẨM</h5>
+                <div class="text-dark" style="white-space: pre-line; line-height: 1.8;">
+                    {{ snack.description|default:"Chưa có mô tả nào cho sản phẩm này." }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- REVIEWS SECTION -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="fw-bold bg-light p-3 mb-4 rounded">ĐÁNH GIÁ SẢN PHẨM</h5>
+
+                <!-- Average rating summary -->
+                {% if review_count > 0 %}
+                <div class="d-flex align-items-center mb-4 p-3" style="background: #fffbf0; border-radius: 4px;">
+                    <div class="text-center me-4">
+                        <div style="font-size: 48px; font-weight: 700; color: var(--shopee-red); line-height: 1;">{{ avg_rating }}</div>
+                        <div class="mt-1">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= avg_rating %}
+                                    <i class="fa-solid fa-star text-orange" style="font-size: 18px;"></i>
+                                {% else %}
+                                    <i class="fa-regular fa-star text-orange" style="font-size: 18px;"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 13px;">{{ review_count }} đánh giá</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Review list -->
+                {% for review in reviews %}
+                <div class="border-bottom py-3">
+                    <div class="d-flex align-items-center mb-1">
+                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width:36px; height:36px; font-size:14px; font-weight:600;">
+                            {{ review.user.username|first|upper }}
+                        </div>
+                        <div>
+                            <div class="fw-semibold" style="font-size: 14px;">{{ review.user.username }}</div>
+                            <div>
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <i class="fa-solid fa-star text-orange" style="font-size: 12px;"></i>
+                                    {% else %}
+                                        <i class="fa-regular fa-star text-muted" style="font-size: 12px;"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="text-muted ms-2" style="font-size: 12px;">{{ review.createdDate|date:"d/m/Y" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mb-0 mt-2" style="font-size: 14px; color: #333;">{{ review.content }}</p>
+                </div>
+                {% empty %}
+                <p class="text-muted">Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!</p>
+                {% endfor %}
+
+                <!-- Review form -->
+                {% if user.is_authenticated %}
+                    {% if user_reviewed %}
+                        <div class="alert alert-info mt-4" style="font-size: 14px;">
+                            <i class="fa-solid fa-circle-check me-2"></i>Bạn đã đánh giá sản phẩm này rồi.
+                        </div>
+                    {% else %}
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="fw-bold mb-3">Viết Đánh Giá Của Bạn</h6>
+                        <form method="post" action="{% url 'products:product_detail' snack.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Chọn Mức Sao</label>
+                                <div class="d-flex gap-2 star-select" style="font-size: 28px;">
+                                    {% for i in "12345" %}
+                                    <label style="cursor:pointer; color: #ccc;" class="star-label">
+                                        <input type="radio" name="rating" value="{{ forloop.counter }}" style="display:none;" required>
+                                        <i class="fa-solid fa-star"></i>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="reviewContent" class="form-label fw-semibold">Nhận Xét</label>
+                                <textarea name="content" id="reviewContent" class="form-control" rows="3" placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn text-white fw-bold" style="background-color: #00a8ff; border: none; border-radius: 2px; padding: 8px 28px;">Gửi Đánh Giá</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                {% else %}
+                <div class="mt-4 p-3 bg-light rounded text-center" style="font-size: 14px;">
+                    <a href="{% url 'accounts:login' %}" style="color: #00a8ff;">Đăng nhập</a> để viết đánh giá sản phẩm.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.star-label { transition: color 0.15s; }
+.star-select:hover .star-label { color: #ee4d2d; }
+.star-select .star-label:hover ~ .star-label { color: #ccc !important; }
+.star-select .star-label.selected { color: #ee4d2d; }
+</style>
+<script>
+(function() {
+    const stars = document.querySelectorAll('.star-label');
+    stars.forEach(function(star, idx) {
+        star.addEventListener('click', function() {
+            stars.forEach(function(s, i) {
+                s.style.color = i <= idx ? '#ee4d2d' : '#ccc';
+                s.classList.toggle('selected', i <= idx);
+            });
+            star.querySelector('input[type=radio]').checked = true;
+        });
+        star.addEventListener('mouseenter', function() {
+            stars.forEach(function(s, i) {
+                s.style.color = i <= idx ? '#ee4d2d' : '#ccc';
+            });
+        });
+    });
+    document.querySelector('.star-select')?.addEventListener('mouseleave', function() {
+        stars.forEach(function(s) {
+            if (!s.classList.contains('selected')) s.style.color = '#ccc';
+        });
+    });
+})();
+</script>
+
+{% if similar_snacks %}
+<div class="row mt-5">
+    <div class="col-12">
+        <h4 class="fw-bold mb-4">Sản Phẩm Tương Tự</h4>
+        <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-2">
+            {% for sim_snack in similar_snacks %}
+                <div class="col">
+                    <a href="{% url 'products:product_detail' sim_snack.id %}" class="h-100" style="border: 1px solid transparent; transition: transform 0.1s, border 0.1s, box-shadow 0.1s; background: #fff; text-decoration: none; color: #000; display: block;">
+                        <div style="position: relative; width: 100%; padding-top: 100%;">
+                            {% if sim_snack.image %}
+                                <img src="{{ sim_snack.image }}" alt="{{ sim_snack.snackName }}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light text-center text-muted d-flex align-items-center justify-content-center h-100 position-absolute w-100 top-0 start-0">
+                                    <i class="fa-solid fa-image fa-2x mb-2"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div style="font-size: 12px; line-height: 14px; height: 28px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-top: 8px; margin-bottom: 4px; padding: 0 8px;">
+                            {{ sim_snack.snackName }}
+                        </div>
+                        <div style="padding: 0 8px 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: var(--shopee-red); font-size: 16px;">{{ sim_snack.price|dot_thousands }} ₫</span>
+                            <span style="font-size: 12px; color: rgba(0,0,0,.54);">Đã bán {{ sim_snack.soldCount|intcomma }}</span>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

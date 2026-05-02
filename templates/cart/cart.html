@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load humanize custom_filters %}
+
+{% block content %}
+<h2 class="fw-bold mb-4">Giỏ Hàng Của Bạn</h2>
+
+{% if cart.items.count > 0 %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sản Phẩm</th>
+                                <th>Đơn Giá</th>
+                                <th>Số Lượng</th>
+                                <th>Tổng</th>
+                                <th>Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart.items.all %}
+                            <tr>
+                                <td class="align-middle">
+                                    <div class="d-flex align-items-center">
+                                        {% if item.snack.image %}
+                                            <img src="{{ item.snack.image }}" alt="{{ item.snack.snackName }}" class="img-thumbnail me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                        {% endif %}
+                                        <h6 class="mb-0">{{ item.snack.snackName }}</h6>
+                                    </div>
+                                </td>
+                                <td class="align-middle">{{ item.unitPrice|dot_thousands }} ₫</td>
+                                <td class="align-middle">
+                                    <form action="{% url 'cart:cart_update' item.id %}" method="post" class="d-flex" style="width: 120px;">
+                                        {% csrf_token %}
+                                        <input type="number" name="quantity" class="form-control form-control-sm me-2" value="{{ item.quantity }}" min="1" max="{{ item.snack.quantity|add:item.quantity }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-rotate-right"></i></button>
+                                    </form>
+                                </td>
+                                <td class="align-middle fw-bold">{{ item.totalPrice|dot_thousands }} ₫</td>
+                                <td class="align-middle">
+                                    <form action="{% url 'cart:cart_remove' item.id %}" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title fw-bold border-bottom pb-3 mb-3">Tổng Đơn Hàng</h5>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Tạm tính</span>
+                    <span class="fw-bold">{{ cart.totalAmount|dot_thousands }} ₫</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Phí vận chuyển</span>
+                    <span>Miễn phí</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="fw-bold h5 mb-0">Tổng Tiền</span>
+                    <span class="fw-bold h5 mb-0 text-orange">{{ cart.totalAmount|dot_thousands }} ₫</span>
+                </div>
+                <a href="{% url 'orders:checkout' %}" class="btn w-100 py-2 fw-bold text-white" style="background-color: #00a8ff; border: none; border-radius: 2px;">Tiến Hành Thanh Toán</a>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <a href="{% url 'products:product_list' %}" class="text-decoration-none"><i class="fa-solid fa-arrow-left"></i> Tiếp Tục Mua Sắm</a>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="fa-solid fa-cart-shopping fa-5x text-muted mb-4"></i>
+    <h3>Giỏ hàng của bạn đang trống</h3>
+    <p class="text-muted">Có vẻ như bạn chưa thêm đồ ăn vặt nào vào giỏ hàng.</p>
+    <a href="{% url 'products:product_list' %}" class="btn mt-3 text-white fw-bold" style="background-color: #00a8ff; border: none; border-radius: 2px; padding: 10px 30px;">Bắt Đầu Mua Sắm</a>
+</div>
+{% endif %}
+{% endblock %}

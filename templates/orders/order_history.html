@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load humanize custom_filters %}
+
+{% block content %}
+<h2 class="fw-bold mb-4">Lịch Sử Đơn Hàng</h2>
+
+<div class="row">
+    <div class="col-12">
+        {% if orders %}
+            <div class="table-responsive">
+                <table class="table table-hover shadow-sm bg-white rounded">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mã Đơn</th>
+                            <th>Ngày Đặt</th>
+                            <th>Tổng Tiền</th>
+                            <th>Trạng Thái</th>
+                            <th>Sản Phẩm</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td class="align-middle fw-bold">#{{ order.id }}</td>
+                            <td class="align-middle">{{ order.createdDate|date:"d/m/Y H:i" }}</td>
+                            <td class="align-middle fw-bold text-orange">{{ order.totalAmount|dot_thousands }} ₫</td>
+                            <td class="align-middle">
+                                {% if order.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Chờ Xử Lý</span>
+                                {% elif order.status == 'approved' %}
+                                    <span class="badge bg-info">Đã Duyệt</span>
+                                {% elif order.status == 'shipped' %}
+                                    <span class="badge bg-success">Đang Giao</span>
+                                {% elif order.status == 'cancelled' %}
+                                    <span class="badge bg-danger">Đã Hủy</span>
+                                {% endif %}
+                            </td>
+                            <td class="align-middle">
+                                <ul class="list-unstyled mb-0">
+                                    {% for item in order.items.all %}
+                                        <li><small>{{ item.quantity }}x {{ item.snack.snackName|default:"Sản phẩm đã xóa" }}</small></li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td class="align-middle">
+                                {% if order.status == 'pending' %}
+                                    <form action="{% url 'orders:cancel_order' order.id %}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Hủy Đơn</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fa-solid fa-box-open fa-5x text-muted mb-4"></i>
+                <h3>Chưa Có Đơn Hàng</h3>
+                <p class="text-muted">Bạn chưa đặt đơn hàng nào.</p>
+                <a href="{% url 'products:product_list' %}" class="btn btn-orange mt-3">Bắt Đầu Mua Sắm</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

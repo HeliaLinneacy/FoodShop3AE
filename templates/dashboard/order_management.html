@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load humanize custom_filters %}
+
+{% block content %}
+<style>
+    .status-badge { font-size: 12px; padding: 4px 10px; border-radius: 12px; font-weight: 600; }
+    .filter-tab { border: none; background: #f0f0f0; padding: 7px 18px; border-radius: 20px; font-size: 13px; color: #555; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+    .filter-tab:hover, .filter-tab.active { background: #ee4d2d; color: #fff; }
+    .order-row:hover { background: #fafafa; }
+    .status-select { border: 1.5px solid #dee2e6; border-radius: 6px; padding: 4px 8px; font-size: 13px; cursor: pointer; }
+    .update-btn { background: #00a8ff; color: #fff; border: none; border-radius: 4px; padding: 5px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .update-btn:hover { background: #0090dd; }
+    .card-header-custom { background: linear-gradient(90deg, #ee4d2d 0%, #f63 100%); color: white; }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Quản Lý Đơn Hàng</h2>
+        <p class="text-muted mb-0" style="font-size: 14px;">Xem và cập nhật trạng thái tất cả đơn hàng</p>
+    </div>
+    <a href="{% url 'dashboard:home' %}" class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left me-1"></i> Bảng Điều Khiển
+    </a>
+</div>
+
+<!-- Status filter tabs -->
+<div class="mb-4 d-flex gap-2 flex-wrap align-items-center">
+    <span class="text-muted me-1" style="font-size: 13px;">Lọc:</span>
+    <a href="{% url 'dashboard:order_management' %}" class="filter-tab {% if not status_filter %}active{% endif %}">
+        Tất cả ({{ orders_count_all }})
+    </a>
+    <a href="?status=pending" class="filter-tab {% if status_filter == 'pending' %}active{% endif %}">
+        ⏳ Chờ xử lý
+    </a>
+    <a href="?status=approved" class="filter-tab {% if status_filter == 'approved' %}active{% endif %}">
+        ✅ Đã duyệt
+    </a>
+    <a href="?status=shipped" class="filter-tab {% if status_filter == 'shipped' %}active{% endif %}">
+        🚚 Đang giao
+    </a>
+    <a href="?status=cancelled" class="filter-tab {% if status_filter == 'cancelled' %}active{% endif %}">
+        ❌ Đã hủy
+    </a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header card-header-custom py-3 px-4">
+        <h5 class="mb-0 fw-bold">
+            <i class="fa-solid fa-clipboard-list me-2"></i>
+            Danh Sách Đơn Hàng
+            <span class="badge bg-white text-dark ms-2" style="font-size: 13px;">{{ orders|length }}</span>
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-4 py-3">Mã Đơn</th>
+                        <th class="py-3">Khách Hàng</th>
+                        <th class="py-3">Ngày Đặt</th>
+                        <th class="py-3">Sản Phẩm</th>
+                        <th class="py-3">Tổng Tiền</th>
+                        <th class="py-3">Trạng Thái Hiện Tại</th>
+                        <th class="py-3 text-center">Cập Nhật Trạng Thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr class="order-row">
+                        <td class="px-4 py-3 fw-bold align-middle">#{{ order.id }}</td>
+                        <td class="py-3 align-middle">
+                            <div class="fw-semibold" style="font-size: 13px;">{{ order.receiverName }}</div>
+                            <div class="text-muted" style="font-size: 12px;">{{ order.user.username }}</div>
+                            <div class="text-muted" style="font-size: 12px;"><i class="fa-solid fa-phone me-1"></i>{{ order.phoneNumber }}</div>
+                        </td>
+                        <td class="py-3 align-middle" style="font-size: 13px;">{{ order.createdDate|date:"d/m/Y H:i" }}</td>
+                        <td class="py-3 align-middle">
+                            {% for item in order.items.all %}
+                                <div style="font-size: 12px; color: #444;">{{ item.quantity }}× {{ item.snack.snackName|default:"Đã xóa"|truncatechars:25 }}</div>
+                            {% endfor %}
+                        </td>
+                        <td class="py-3 align-middle fw-bold" style="color: #ee4d2d; font-size: 14px;">{{ order.totalAmount|dot_thousands }} ₫</td>
+                        <td class="py-3 align-middle">
+                            {% if order.status == 'pending' %}
+                                <span class="badge bg-warning text-dark status-badge">⏳ Chờ Xử Lý</span>
+                            {% elif order.status == 'approved' %}
+                                <span class="badge bg-info status-badge">✅ Đã Duyệt</span>
+                            {% elif order.status == 'shipped' %}
+                                <span class="badge bg-success status-badge">🚚 Đang Giao</span>
+                            {% elif order.status == 'cancelled' %}
+                                <span class="badge bg-danger status-badge">❌ Đã Hủy</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 align-middle text-center">
+                            <form action="{% url 'dashboard:update_order_status' order.id %}" method="post" class="d-flex align-items-center justify-content-center gap-2">
+                                {% csrf_token %}
+                                <select name="status" class="status-select">
+                                    {% for val, label in status_choices %}
+                                    <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="update-btn">
+                                    <i class="fa-solid fa-rotate me-1"></i>Cập Nhật
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-inbox fa-3x mb-3 d-block"></i>
+                            Không có đơn hàng nào.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
