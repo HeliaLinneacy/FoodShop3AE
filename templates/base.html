@@ -523,7 +523,9 @@
             <!-- Welcome message -->
             <div class="mimi-msg bot">
                 <div class="mimi-bubble-avatar">🤖</div>
-                <div class="mimi-bubble" id="welcome-msg"></div>
+                <div class="mimi-bubble" id="welcome-msg"
+                     data-welcome="{% if user.is_authenticated %}Xin chào <strong>{{ user.username }}</strong>! 😊 Mình là <strong>Mimi</strong>, trợ lý của Ba Anh Em Shop.<br><br>Mình có thể giúp bạn tìm sản phẩm, xem đơn hàng, tư vấn mua sắm! Bạn cần gì?{% else %}Xin chào! 👋 Mình là <strong>Mimi</strong> - trợ lý của <strong>Ba Anh Em Shop</strong>.<br><br>Mình có thể giúp bạn tìm đồ ăn vặt ngon, xem giá &amp; tư vấn mua sắm. Hỏi mình bất cứ điều gì!{% endif %}"
+                ></div>
             </div>
             <!-- Typing indicator -->
             <div id="mimi-typing">
@@ -562,14 +564,9 @@
         var CHATBOT_URL = '/chatbot/message/';
         var CSRF_TOKEN = '{{ csrf_token }}';
 
-        // Welcome message
-        var welcomeText = {% if user.is_authenticated %}
-            'Xin chào <strong>{{ user.username }}</strong>! 😊 Mình là <strong>Mimi</strong>, trợ lý của Ba Anh Em Shop.<br><br>Mình có thể giúp bạn tìm sản phẩm, xem đơn hàng, tư vấn mua sắm! Bạn cần gì?'
-        {% else %}
-            'Xin chào! 👋 Mình là <strong>Mimi</strong> - trợ lý của <strong>Ba Anh Em Shop</strong>.<br><br>Mình có thể giúp bạn tìm đồ ăn vặt ngon, xem giá & tư vấn mua sắm. Hỏi mình bất cứ điều gì!'
-        {% endif %};
-
-        document.getElementById('welcome-msg').innerHTML = welcomeText;
+        // Welcome message — đọc từ data attribute (không dùng Django tag trong JS)
+        var welcomeEl = document.getElementById('welcome-msg');
+        welcomeEl.innerHTML = welcomeEl.getAttribute('data-welcome') || '';
 
         window.mimiToggle = function() {
             isOpen = !isOpen;

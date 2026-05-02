@@ -98,7 +98,9 @@
                                     {% elif order.status == 'approved' %}
                                         <span class="badge bg-info">Đã Duyệt</span>
                                     {% elif order.status == 'shipped' %}
-                                        <span class="badge bg-success">Đang Giao</span>
+                                        <span class="badge bg-primary">Đang Giao</span>
+                                    {% elif order.status == 'delivered' %}
+                                        <span class="badge bg-success">📦 Đã Giao Hàng</span>
                                     {% elif order.status == 'cancelled' %}
                                         <span class="badge bg-danger">Đã Hủy</span>
                                     {% endif %}

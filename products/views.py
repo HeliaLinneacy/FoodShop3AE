@@ -17,7 +17,7 @@ def product_list(request):
     if query:
         snacks = snacks.filter(snackName__icontains=query)
         
-    sort_by = request.GET.get('sort', 'relevance')
+    sort_by = request.GET.get('sort', 'random')
     if sort_by == 'newest':
         snacks = snacks.order_by('-id')
     elif sort_by == 'bestselling':
@@ -27,7 +27,8 @@ def product_list(request):
     elif sort_by == 'price_desc':
         snacks = snacks.order_by('-price')
     else:
-        snacks = snacks.order_by('-id')
+        # Mặc định: hiển thị ngẫu nhiên
+        snacks = snacks.order_by('?')
         
     context = {
         'snacks': snacks,
