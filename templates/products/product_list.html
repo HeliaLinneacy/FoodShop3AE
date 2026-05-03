@@ -130,8 +130,8 @@
         margin-right: 6px;
     }
 
-    /* Mobile-specific styles */
-    @media (max-width: 767px) {
+    /* Tablet/phone landscape: giữ toggle, không hiện sidebar cố định */
+    @media (max-width: 991px) {
         .sort-bar {
             padding: 10px 12px;
             gap: 4px;
@@ -180,10 +180,10 @@
 
 <div class="row">
     <!-- Sidebar / Filters -->
-    <div class="col-md-2 mb-4">
+    <div class="col-lg-2 mb-4">
 
-        <!-- Mobile: Nút toggle thu gọn (chỉ hiện trên mobile) -->
-        <div class="d-md-none">
+        <!-- Mobile/Tablet: Nút toggle thu gọn (chỉ hiện < lg) -->
+        <div class="d-lg-none">
             <button class="mobile-filter-toggle" type="button"
                     data-bs-toggle="collapse" data-bs-target="#filterSidebar" aria-expanded="false">
                 <span><i class="fa-solid fa-filter me-2 text-shopee"></i> BỘ LỌC TÌM KIẾM</span>
@@ -202,8 +202,8 @@
             </div>
         </div>
 
-        <!-- Desktop: Hiện thị bình thường (chỉ hiện trên máy tính) -->
-        <div class="d-none d-md-block">
+        <!-- Desktop (lg+): Hiển thị sidebar cố định -->
+        <div class="d-none d-lg-block">
             <div class="mb-4">
                 <div class="filter-header"><i class="fa-solid fa-filter me-2"></i> BỘ LỌC TÌM KIẾM</div>
             </div>
@@ -221,7 +221,7 @@
     </div>
 
     <!-- Product Grid -->
-    <div class="col-md-10">
+    <div class="col-lg-10">
         <!-- Sort Bar -->
         <div class="sort-bar">
             <span class="me-3">Sắp xếp theo</span>
@@ -245,7 +245,7 @@
             </form>
         </div>
 
-        <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-2">
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-2">
             {% for snack in snacks %}
                 <div class="col">
                     <a href="{% url 'products:product_detail' snack.id %}" class="shopee-card h-100">
