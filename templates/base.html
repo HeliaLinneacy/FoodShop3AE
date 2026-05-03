@@ -517,8 +517,8 @@
                 {% if user.is_authenticated %}
                 <div class="dropdown d-md-none">
                     <button class="btn p-0 border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                            style="background:transparent; color:white; font-size:22px;">
-                        <i class="fa-solid fa-circle-user"></i>
+                            style="background:rgba(255,255,255,0.25); color:white; font-size:18px; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; border: 1.5px solid rgba(255,255,255,0.5) !important;">
+                        <i class="fa-solid fa-user"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" style="min-width:180px; font-size:14px;">
                         <li><span class="dropdown-item-text fw-bold text-shopee">{{ user.username }}</span></li>
@@ -541,8 +541,9 @@
                 </div>
                 {% else %}
                 <div class="d-md-none">
-                    <a href="{% url 'accounts:login' %}" style="color:white; font-size:22px;">
-                        <i class="fa-regular fa-circle-user"></i>
+                    <a href="{% url 'accounts:login' %}" 
+                       style="background:rgba(255,255,255,0.25); color:white; font-size:18px; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; border: 1.5px solid rgba(255,255,255,0.5); text-decoration:none;">
+                        <i class="fa-solid fa-user"></i>
                     </a>
                 </div>
                 {% endif %}
