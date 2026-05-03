@@ -502,7 +502,8 @@
                 <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
             </form>
             
-            <div>
+            <div class="d-flex align-items-center gap-2">
+                <!-- Giỏ hàng -->
                 <a href="{% url 'cart:cart_detail' %}" class="cart-icon position-relative">
                     <i class="fa-solid fa-cart-shopping"></i>
                     {% if cart_item_count and cart_item_count > 0 %}
@@ -511,6 +512,40 @@
                     </span>
                     {% endif %}
                 </a>
+
+                <!-- User menu: chỉ hiện trên mobile (d-md-none) -->
+                {% if user.is_authenticated %}
+                <div class="dropdown d-md-none">
+                    <button class="btn p-0 border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                            style="background:transparent; color:white; font-size:22px;">
+                        <i class="fa-solid fa-circle-user"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" style="min-width:180px; font-size:14px;">
+                        <li><span class="dropdown-item-text fw-bold text-shopee">{{ user.username }}</span></li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fa-regular fa-user me-2"></i>Tài khoản</a></li>
+                        <li><a class="dropdown-item" href="{% url 'orders:order_history' %}"><i class="fa-solid fa-box me-2"></i>Đơn Mua</a></li>
+                        {% if user.role == 'admin' or user.is_staff %}
+                        <li><a class="dropdown-item" href="{% url 'dashboard:home' %}"><i class="fa-solid fa-gauge me-2"></i>Quản Trị</a></li>
+                        {% endif %}
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li>
+                            <form action="{% url 'accounts:logout' %}" method="post" class="m-0 p-0">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i>Đăng Xuất
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+                {% else %}
+                <div class="d-md-none">
+                    <a href="{% url 'accounts:login' %}" style="color:white; font-size:22px;">
+                        <i class="fa-regular fa-circle-user"></i>
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
