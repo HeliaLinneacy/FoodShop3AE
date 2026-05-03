@@ -16,8 +16,15 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = [
     'nguyenducthang.id.vn',
     'www.nguyenducthang.id.vn',
-    '.railway.app',   # Cho phép domain Railway
-    '*',              # Tạm thời - thu hẹp lại sau khi chạy ổn
+    '.railway.app',
+    '*',
+]
+
+# Cần thiết để form POST (logout, login, v.v.) hoạt động qua HTTPS proxy của Railway
+CSRF_TRUSTED_ORIGINS = [
+    'https://nguyenducthang.id.vn',
+    'https://www.nguyenducthang.id.vn',
+    'https://*.railway.app',
 ]
 
 INSTALLED_APPS = [
