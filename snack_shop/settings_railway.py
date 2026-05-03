@@ -21,6 +21,7 @@ ALLOWED_HOSTS = [
 ]
 
 INSTALLED_APPS = [
+    'jazzmin',                       # Phải đứng trước django.contrib.admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -117,3 +118,78 @@ MEDIA_ROOT = BASE_DIR / 'media'
 AUTH_USER_MODEL = 'accounts.User'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ─────────────────────────────────────────────
+# JAZZMIN – Giao diện Admin đẹp
+# ─────────────────────────────────────────────
+JAZZMIN_SETTINGS = {
+    'site_title': 'Ba Anh Em Shop',
+    'site_header': 'Ba Anh Em Shop',
+    'site_brand': 'Ba Anh Em Shop',
+    'welcome_sign': 'Chào mừng đến với trang quản trị',
+    'copyright': 'Ba Anh Em Shop © 2026',
+    'site_logo': None,
+    'site_icon': None,
+    'search_model': ['accounts.User', 'products.Snack', 'orders.Order'],
+    'user_avatar': None,
+    'topmenu_links': [
+        {'name': '🏠 Trang chủ shop', 'url': '/', 'new_window': True},
+        {'name': '📦 Đơn hàng', 'model': 'orders.Order'},
+        {'name': '⭐ Đánh giá', 'model': 'reviews.Review'},
+    ],
+    'show_sidebar': True,
+    'navigation_expanded': True,
+    'order_with_respect_to': ['accounts', 'products', 'orders', 'reviews', 'cart'],
+    'icons': {
+        'auth':               'fas fa-users-cog',
+        'accounts.User':      'fas fa-user',
+        'products.Category':  'fas fa-tags',
+        'products.Snack':     'fas fa-cookie-bite',
+        'orders.Order':       'fas fa-shopping-bag',
+        'orders.OrderDetail': 'fas fa-list-ul',
+        'reviews.Review':     'fas fa-star',
+        'cart.Cart':          'fas fa-shopping-cart',
+        'cart.CartDetail':    'fas fa-cart-plus',
+    },
+    'default_icon_parents': 'fas fa-chevron-circle-right',
+    'default_icon_children': 'fas fa-circle',
+    'related_modal_active': True,
+    'custom_css': None,
+    'custom_js': None,
+    'use_google_fonts_cdn': True,
+    'show_ui_builder': False,   # Tắt trên production
+    'changeform_format': 'horizontal_tabs',
+    'language_chooser': False,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    'navbar_small_text': False,
+    'footer_small_text': False,
+    'body_small_text': False,
+    'brand_small_text': False,
+    'brand_colour': 'navbar-danger',
+    'accent': 'accent-danger',
+    'navbar': 'navbar-danger navbar-dark',
+    'no_navbar_border': True,
+    'navbar_fixed': True,
+    'layout_boxed': False,
+    'footer_fixed': False,
+    'sidebar_fixed': True,
+    'sidebar': 'sidebar-dark-danger',
+    'sidebar_nav_small_text': False,
+    'sidebar_disable_expand': False,
+    'sidebar_nav_child_indent': True,
+    'sidebar_nav_compact_style': False,
+    'sidebar_nav_legacy_style': False,
+    'sidebar_nav_flat_style': False,
+    'theme': 'default',
+    'dark_mode_theme': None,
+    'button_classes': {
+        'primary':   'btn-primary',
+        'secondary': 'btn-outline-secondary',
+        'info':      'btn-outline-info',
+        'warning':   'btn-warning',
+        'danger':    'btn-danger',
+        'success':   'btn-success',
+    },
+}
