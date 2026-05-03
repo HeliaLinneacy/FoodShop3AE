@@ -17,6 +17,15 @@ def product_list(request):
     if query:
         snacks = snacks.filter(snackName__icontains=query)
         
+    # Tính sao trung bình bằng Subquery (tránh xung đột GROUP BY + ORDER BY RAND() trên MySQL)
+    avg_subquery = (
+        Review.objects.filter(snack=OuterRef('pk'), status=True)
+        .values('snack')
+        .annotate(avg=Avg('rating'))
+        .values('avg')
+    )
+    snacks = snacks.annotate(avg_rating=Subquery(avg_subquery))
+
     sort_by = request.GET.get('sort', 'random')
     if sort_by == 'newest':
         snacks = snacks.order_by('-id')
@@ -26,18 +35,12 @@ def product_list(request):
         snacks = snacks.order_by('price')
     elif sort_by == 'price_desc':
         snacks = snacks.order_by('-price')
+    elif sort_by == 'top_rated':
+        # Sắp xếp theo đánh giá cao nhất, sản phẩm chưa có đánh giá xuống cuối
+        snacks = snacks.order_by('-avg_rating')
     else:
         # Mặc định: hiển thị ngẫu nhiên
         snacks = snacks.order_by('?')
-
-    # Tính sao trung bình bằng Subquery (tránh xung đột GROUP BY + ORDER BY RAND() trên MySQL)
-    avg_subquery = (
-        Review.objects.filter(snack=OuterRef('pk'), status=True)
-        .values('snack')
-        .annotate(avg=Avg('rating'))
-        .values('avg')
-    )
-    snacks = snacks.annotate(avg_rating=Subquery(avg_subquery))
         
     context = {
         'snacks': snacks,

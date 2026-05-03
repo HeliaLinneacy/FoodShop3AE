@@ -235,6 +235,7 @@
                 <button type="submit" name="sort" value="relevance" class="sort-btn {% if current_sort == 'relevance' %}active{% endif %}">Liên Quan</button>
                 <button type="submit" name="sort" value="newest" class="sort-btn {% if current_sort == 'newest' %}active{% endif %}">Mới Nhất</button>
                 <button type="submit" name="sort" value="bestselling" class="sort-btn {% if current_sort == 'bestselling' %}active{% endif %}">Bán Chạy</button>
+                <button type="submit" name="sort" value="top_rated" class="sort-btn {% if current_sort == 'top_rated' %}active{% endif %}">⭐ Đánh Giá Cao</button>
                 
                 <select name="sort" class="sort-btn" style="border: 1px solid rgba(0,0,0,.09);" onchange="document.getElementById('sortForm').submit();">
                     <option value="" disabled {% if current_sort != 'price_asc' and current_sort != 'price_desc' %}selected{% endif %}>Giá</option>
