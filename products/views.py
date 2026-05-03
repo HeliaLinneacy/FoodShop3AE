@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.db.models import Avg, OuterRef, Subquery
 from .models import Snack, Category
 from reviews.models import Review
+from orders.models import OrderDetail
 
 def product_list(request):
     snacks = Snack.objects.filter(status=True)
@@ -57,13 +58,17 @@ def product_detail(request, pk):
     avg_rating = round(avg_rating, 1) if avg_rating else 0
     review_count = reviews.count()
 
-    # Check if user has already reviewed
+    # Check if user has already reviewed and purchased
     user_reviewed = False
+    has_purchased = False
     if request.user.is_authenticated:
         user_reviewed = Review.objects.filter(snack=snack, user=request.user).exists()
+        has_purchased = OrderDetail.objects.filter(order__user=request.user, snack=snack).exists()
 
     if request.method == 'POST' and request.user.is_authenticated:
-        if user_reviewed:
+        if not has_purchased:
+            messages.error(request, 'Bạn cần mua sản phẩm này để có thể đánh giá.')
+        elif user_reviewed:
             messages.error(request, 'Bạn đã đánh giá sản phẩm này rồi.')
         else:
             rating = int(request.POST.get('rating', 5))
@@ -87,6 +92,7 @@ def product_detail(request, pk):
         'avg_rating': avg_rating,
         'review_count': review_count,
         'user_reviewed': user_reviewed,
+        'has_purchased': has_purchased,
     }
     return render(request, 'products/product_detail.html', context)
 
