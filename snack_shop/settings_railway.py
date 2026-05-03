@@ -27,6 +27,15 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
 ]
 
+# Railway chạy sau HTTPS reverse proxy - cần thiết để Django nhận biết đúng giao thức
+# Ngăn vòng lặp redirect vô hạn trên thiết bị mới
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = False         # Railway đã xử lý HTTPS, Django không cần redirect
+SESSION_COOKIE_SECURE = True        # Cookie chỉ gửi qua HTTPS
+SESSION_COOKIE_SAMESITE = 'Lax'     # Cho phép cookie khi chuyển trang bình thường
+CSRF_COOKIE_SECURE = True           # CSRF cookie chỉ qua HTTPS
+CSRF_COOKIE_SAMESITE = 'Lax'       # Cho phép CSRF khi chuyển trang
+
 INSTALLED_APPS = [
     'jazzmin',                       # Phải đứng trước django.contrib.admin
     'django.contrib.admin',
