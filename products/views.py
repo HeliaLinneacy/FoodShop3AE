@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Avg
+from django.db.models import Avg, OuterRef, Subquery
 from .models import Snack, Category
 from reviews.models import Review
 
@@ -29,6 +29,15 @@ def product_list(request):
     else:
         # Mặc định: hiển thị ngẫu nhiên
         snacks = snacks.order_by('?')
+
+    # Tính sao trung bình bằng Subquery (tránh xung đột GROUP BY + ORDER BY RAND() trên MySQL)
+    avg_subquery = (
+        Review.objects.filter(snack=OuterRef('pk'), status=True)
+        .values('snack')
+        .annotate(avg=Avg('rating'))
+        .values('avg')
+    )
+    snacks = snacks.annotate(avg_rating=Subquery(avg_subquery))
         
     context = {
         'snacks': snacks,
