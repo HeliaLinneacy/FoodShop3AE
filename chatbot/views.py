@@ -172,12 +172,24 @@ INTENTS = {
         'hom nay la ngay gi', 'bay gio la may gio', 'may gio roi',
         'ngay am', 'ngay duong', 'ngay hom nay', 'thang nay la thang may',
         'nam nay la nam nao', 'xem gio', 'xem ngay', 'dong ho', 'calendar',
+        'hom nay mong may', 'lich hom nay', 'coi ngay', 'coi gio', 'bao nhieu gio roi',
+        'xem thu may', 'giac nay la may gio', 'thoi gian', 'bay gio la luc nao',
+        'hom qua la ngay may', 'hom nay la ngay may', 'gio giac', 'xem gio giup minh',
+        'nay mong may', 'nay la thu may', 'gio hien tai', 'ngay hien tai',
     ],
     'thoi_tiet': [
         'thoi tiet', 'nang hay mua', 'du bao thoi tiet', 'nhiet do',
         'hom nay troi the nao', 'co mua khong', 'nong khong', 'lanh khong',
         'troi dep khong', 'ngoai troi', 'mua roi', 'nang to', 'khi hau',
         'thoi tiet the nao', 'thoi tiet hom nay',
+        'troi nong qua', 'troi lanh qua', 'dang mua a', 'nang gat khong', 
+        'mua to khong', 'do am', 'tu van thoi tiet', 'hcm co mua khong', 
+        'hn co mua khong', 'co bao khong', 'am u', 'troi dep', 'nhiet do ngoai troi',
+    ],
+    'ngay_le': [
+        'ngay le', 'tet', 'noel', 'giang sinh', 'trung thu', 'le tinh nhan', 
+        'valentine', 'quoc khanh', 'ngay phu nu', '8/3', '20/10', 'halloween',
+        'quoc te lao dong', '1/5', '30/4', 'giai phong', 'le gi', 'co khuyen mai le',
     ],
     'khen_ngoi': [
         'gioi qua', 'thong minh', 'xin xo', 'hay qua', 'bot gioi',
@@ -508,6 +520,12 @@ def get_bot_response(message: str, user) -> str:
         return ("🌤️ **Thời tiết hôm nay:**\n\n"
                 "Mimi không có máy đo nhiệt độ ở chỗ bạn, nhưng dù mưa hay nắng thì nằm nhà lướt shop chọn đồ ăn vặt là chuẩn bài nhất đó! 😋\n\n"
                 "Bạn có muốn xem các món đang SALE không?")
+
+    # ── NGÀY LỄ ───────────────────────────────────────────────
+    if intent == 'ngay_le':
+        return ("🎉 **Các dịp Lễ Tết:**\n\n"
+                "Những dịp Lễ, Tết hay ngày kỉ niệm, Ba Anh Em Shop thường xuyên tung ra các voucher siêu khủng hoặc quà tặng kèm hấp dẫn!\n"
+                "Hãy ghé qua trang chủ hoặc Fanpage của shop để cập nhật chương trình mới nhất nhé! Mua đồ ăn vặt làm quà tặng cũng hợp lý lắm đó! 🎁")
 
     # ── KHEN NGỢI ─────────────────────────────────────────────
     if intent == 'khen_ngoi':
