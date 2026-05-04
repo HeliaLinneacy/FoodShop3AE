@@ -1,5 +1,6 @@
 import json
 import re
+from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -16,20 +17,29 @@ INTENTS = {
         'xin chao', 'chao ban', 'chao mimi', 'hello', 'hi', 'hey', 'alo',
         'good morning', 'good evening', 'chao buoi sang', 'chao buoi chieu',
         'cho minh hoi', 'minh can tu van', 'can giup do', 'ho tro',
+        'co ai o day khong', 'cho hoi ti', 'ad oi', 'shop oi', 'bot oi',
+        'co do khong', 'tu van giup minh', 'tu van cho minh', 'hi shop',
+        'chao ad', 'allo', 'alo shop', 'mimi oi', 'ban oi',
+        'helo', 'konichiwa', 'nihao', 'chao ngay moi', 'morning', 'yo', 'wassup',
     ],
     'tam_biet': [
         'tam biet', 'bye', 'goodbye', 'thoat', 'het roi', 'cam on nhe',
         'thoi nhe', 'hen gap lai',
+        'pp', 'bai bai', 'out', 'k di nua', 'khong mua nua',
+        'chao tam biet', 'goi lai sau', 'chut nua quay lai', 'de minh xem sau',
+        'de suy nghi them', 'luc khac mua',
+        'cut', 'chuon thoi', 'off day', 'ngu day', 'ngu ngon', 'thang te',
     ],
     'cam_on': [
         'cam on', 'thank', 'thanks', 'thank you', 'cam on nhieu',
         'cam on ban', 'cam on mimi', 'ok cam on', 'tuyet voi cam on',
+        'tks', 'thank kiu', 'thanx', 'da cam on', 'biet roi',
+        'ok', 'oke', 'okay', 'duoc roi', 'vay a', 'hay qua',
+        'tot qua', 'okla', 'tuyet voi',
+        'da ta', 'cam ta', 'doi on', 'ngan lan cam on', 'xin cam on', 'tks ad',
     ],
     'ban_chay': [
-        # Từ nút quick reply
-        'ban chay',
-        # Các biến thể tự nhiên
-        'san pham ban chay', 'mon ban chay', 'hang ban chay',
+        'ban chay', 'san pham ban chay', 'mon ban chay', 'hang ban chay',
         'ban nhieu nhat', 'nhieu nguoi mua nhat', 'nhieu nguoi dat nhat',
         'pho bien nhat', 'duoc mua nhieu nhat', 'duoc ban nhieu nhat',
         'top ban chay', 'top san pham', 'san pham hot',
@@ -38,19 +48,21 @@ INTENTS = {
         'san pham duoc ua chuong', 'duoc yeu thich nhat',
         'dat hang nhieu nhat', 'xuat nhieu nhat',
         'thu hang nhat', 'thu 1', 'thu nhat',
+        'co gi ngon', 'mon nao ngon nhat', 'snack nao ngon', 'an vat gi ngon',
+        'goi y cho minh', 'tu van mon', 'nen mua gi', 'co gi hot',
+        'dang trend', 'top trend', 'nhieu review nhat',
     ],
     'gia_re': [
-        # Từ nút quick reply
-        'gia re',
-        # Các biến thể tự nhiên
-        'san pham gia re', 'hang gia re', 'mon gia re',
+        'gia re', 'san pham gia re', 'hang gia re', 'mon gia re',
         'gia re nhat', 're nhat', 'gia thap nhat', 'thap nhat',
         're hon', 'gia binh dan', 'gia tot', 'gia hop li',
         'tiet kiem nhat', 'khong dat', 'it tien nhat',
         'mua re', 'mua duoc re', 'gia sinh vien', 'gia hoc sinh',
-        'ngân sach it', 'tien it mua gi', 'co it tien',
+        'ngan sach it', 'tien it mua gi', 'co it tien',
         'duoi 20000', 'duoi 30000', 'duoi 50000',
-        'rẻ nhất', 'gia thap', 'san pham gia thap',
+        're nhat', 'gia thap', 'san pham gia thap',
+        'gia hat de', 'sale off', 'clearance', 're vai', 'khuyen mai soc',
+        'gia re qua', 'do re', 'snack re', 'an vat re',
     ],
     'gia_cao': [
         'gia cao nhat', 'gia dat nhat', 'dat nhat', 'cao nhat',
@@ -59,18 +71,22 @@ INTENTS = {
         'expensive', 'dat tien nhat', 'san pham premium',
         'cao cap nhat', 'hang cao cap', 'tuyen chon',
         'gia dung nhat', 'gia hang dau',
+        'sang chanh', 'qua tang', 'vip', 'hang auth', 'chat luong cao',
     ],
     'con_hang': [
         'con hang khong', 'con hang', 'het hang chua', 'het hang',
-        'con san pham khong', 'con hang khong', 'hop luc khong',
+        'con san pham khong', 'hop luc khong',
         'ton kho', 'kho hang', 'so luong con', 'so luong ton',
         'co the mua duoc khong', 'dang co san',
+        'con san khong', 'co san khong', 'hang co san', 'dat co giao ngay khong',
+        'check kho', 'con nhieu khong', 'con may cai', 'mua duoc khong',
     ],
     'danh_muc': [
         'danh muc', 'xem danh muc', 'co nhung danh muc gi',
         'loai san pham', 'cac loai', 'the loai', 'category',
         'co nhung loai gi', 'ban nhung gi', 'co gi ban',
         'kieu san pham', 'nhom san pham', 'phan loai',
+        'menu cua shop', 'co nhung mon nao', 'list mon', 'danh sach mon',
     ],
     'tat_ca_san_pham': [
         'xem tat ca', 'tat ca san pham', 'toan bo san pham',
@@ -78,6 +94,7 @@ INTENTS = {
         'co bao nhieu san pham', 'bao nhieu mon',
         'menu', 'shop co gi', 'ban duoc gi',
         'cho xem het', 'hien thi tat ca',
+        'xem het the loai', 'tat ca the loai', 'tat ca menu',
     ],
     'don_hang': [
         'don hang', 'don mua', 'lich su mua hang',
@@ -86,11 +103,15 @@ INTENTS = {
         'don hang cua toi', 'xem don', 'theo doi don',
         'don dang giao', 'don dang xu li', 'order',
         'da dat hang', 'toi co don', 'don hang den chua',
+        'don hang chua den', 'chua nhan duoc hang', 'huy don', 'muon huy don hang',
+        'doi dia chi', 'doi sdt', 'cap nhat thong tin',
+        'check don', 'tim don', 'don so may', 'ma van don', 'tinh trang don',
     ],
     'gio_hang': [
         'gio hang', 'xem gio hang', 'gio cua toi',
         'cart', 'them vao gio', 'gio dang co gi',
         'san pham trong gio', 'so luong gio',
+        'check gio hang', 'trong gio co gi', 'xoa khoi gio',
     ],
     'thanh_toan': [
         'thanh toan', 'cach thanh toan', 'phuong thuc thanh toan',
@@ -98,6 +119,9 @@ INTENTS = {
         'cod', 'tien mat', 'cach tra tien', 'thanh toan the',
         'ngan hang', 'momo', 'zalopay', 'vnpay',
         'thanh toan online', 'thanh toan khi nhan hang',
+        'stk', 'so tai khoan', 'ngan hang nao', 'ck', 'quet ma', 'qr code',
+        'zalo pay', 'shopee pay',
+        'tra gop', 'visa', 'mastercard', 'the tin dung', 'tra the', 'quet the',
     ],
     'giao_hang': [
         'giao hang', 'van chuyen', 'ship', 'shipping',
@@ -106,6 +130,9 @@ INTENTS = {
         'giao den dau', 'pham vi giao hang', 'khi nao nhan',
         'giao hang mien phi', 'co giao hang khong',
         'khu vuc giao hang', 'van chuyen nhu the nao',
+        'freeship', 'co freeship khong', 'mien phi van chuyen',
+        'ship hcm', 'ship hn', 'ship toan quoc', 'giao buu dien', 'giao tiet kiem',
+        'giao hoat toc', 'grab', 'gojek', 'ahamove', 'bao tien ship',
     ],
     'khuyen_mai': [
         'khuyen mai', 'giam gia', 'sale', 'voucher', 'coupon',
@@ -113,23 +140,82 @@ INTENTS = {
         'co sale khong', 'co giam gia khong', 'gia tot khong',
         'flash sale', 'deal hot', 'offer',
         'co dip nao giam gia', 'mua nhieu giam khong',
+        'co qua tang khong', 'tang kem', 'combo', 'mua 1 tang 1',
+        'giam gia cho hoc sinh', 'giam gia cho sinh vien', 'dip le',
     ],
     'danh_gia': [
         'danh gia', 'review', 'nhan xet', 'binh luan',
         'chat luong san pham', 'san pham tot khong',
         'co nen mua khong', 'nguoi ta noi gi',
         'feedback', 'rating', 'sao', 'diem danh gia',
+        'cho minh xem review', 'nhieu nguoi mua khong', 'uy tin khong',
+        'co phai lua dao khong', 'scam', 'tin tuong duoc khong',
     ],
     'lien_he': [
         'lien he', 'contact', 'hotline', 'so dien thoai',
         'email', 'ho tro khach hang', 'cham soc khach hang',
         'support', 'gap van de', 'khieu nai', 'phan hoi',
         'goi cho shop', 'nhan tin cho shop', 'dia chi shop',
+        'facebook shop', 'ig', 'instagram', 'zalo shop', 'sdt shop',
+        'mua truc tiep o dau', 'toi dia chi nao', 'den tan noi', 'ban off khong',
+        'shop minh o dau', 'cua hang nam o dau', 'dia chi', 'toa do', 'vi tri',
     ],
     'gioi_thieu': [
         'mimi la gi', 'mimi la ai', 'bot la gi', 'ban la ai',
         'ban ten gi', 'may tinh', 'robot', 'ai tra loi',
         'may tra loi', 'chương trình', 'trinh nay la gi',
+        'shop ten gi', 'ba anh em shop la gi', 'ai tao ra ban',
+        'ban la nu hay nam', 'bao nhieu tuoi', 'ban co biet an khong',
+    ],
+    'ngay_thang': [
+        'hom nay ngay bao nhieu', 'ngay may', 'thu may', 'thang may',
+        'hom nay la ngay gi', 'bay gio la may gio', 'may gio roi',
+        'ngay am', 'ngay duong', 'ngay hom nay', 'thang nay la thang may',
+        'nam nay la nam nao', 'xem gio', 'xem ngay', 'dong ho', 'calendar',
+    ],
+    'thoi_tiet': [
+        'thoi tiet', 'nang hay mua', 'du bao thoi tiet', 'nhiet do',
+        'hom nay troi the nao', 'co mua khong', 'nong khong', 'lanh khong',
+        'troi dep khong', 'ngoai troi', 'mua roi', 'nang to', 'khi hau',
+        'thoi tiet the nao', 'thoi tiet hom nay',
+    ],
+    'khen_ngoi': [
+        'gioi qua', 'thong minh', 'xin xo', 'hay qua', 'bot gioi',
+        'mimi de thuong', 'dethuong', 'cute', 'dep trai', 'xinh gai',
+        'shop tuyet voi', 'dich vu tot', 'cham soc khach hang tot',
+        'rat vua y', 'rat hai long', '10 diem', 'chuan khong can chinh',
+    ],
+    'phan_nan': [
+        'bot ngu', 'chan the', 'te qua', 'do hoi', 'tra loi sai',
+        'khong hieu gi', 'hong be oi', 'kem qua', 'shop lam an te',
+        'that vong', 'te hai', 'chan ngan', 'phuc vu te',
+    ],
+    'doi_tra': [
+        'doi tra', 'bao hanh', 'tra lai hang', 'hoan tien', 'refund',
+        'hang loi', 'loi san pham', 'hu hong', 'be vo', 'sai san pham',
+        'giao nham', 'khong giong hinh', 'giao thieu', 'chinh sach doi tra',
+        'muc den bu', 'hoan tra', 'lay lai tien',
+    ],
+    'thanh_phan': [
+        'thanh phan', 'lam tu gi', 'co cay khong', 'ngot khong', 'chay an duoc khong', 
+        'an chay', 'nhieu calo khong', 'co beo khong', 'map khong', 'nguyen lieu', 
+        'co chat bao quan khong', 'an kieng', 'healthy', 'dinh duong',
+    ],
+    'bao_quan': [
+        'bao quan', 'de duoc bao lau', 'bo tu lanh', 'de ngoai duoc khong', 
+        'cach bao quan', 'de qua dem', 'hut chan khong',
+    ],
+    'hsd': [
+        'hsd', 'han su dung', 'date', 'ngay san xuat', 'het han', 
+        'bao lau thi het han', 'han con dai khong', 'nsx',
+    ],
+    'si_le': [
+        'ban si', 'gia si', 'lay si', 'mua si', 'mua so luong lon', 
+        'dai ly', 'chiet khau mua nhieu', 'mua buon', 'bo si',
+    ],
+    'giao_nhanh': [
+        'giao nhanh', 'giao lien', 'giao ngay', 'hoa toc', 'doi qua', 
+        'muon an ngay', 'giao gap', 'ship gap', 'ship nhanh', 'can gap', 'now',
     ],
 }
 
@@ -407,6 +493,68 @@ def get_bot_response(message: str, user) -> str:
                 "📦 Theo dõi đơn hàng\n"
                 "🚚 Thông tin giao hàng & thanh toán\n\n"
                 "Hỏi mình bất cứ điều gì nhé!")
+
+    # ── NGÀY THÁNG & THỜI GIAN ────────────────────────────────
+    if intent == 'ngay_thang':
+        now = timezone.localtime(timezone.now())
+        weekday_map = {0: 'Thứ Hai', 1: 'Thứ Ba', 2: 'Thứ Tư', 3: 'Thứ Năm', 4: 'Thứ Sáu', 5: 'Thứ Bảy', 6: 'Chủ Nhật'}
+        day_str = f"{weekday_map[now.weekday()]}, ngày {now.day} tháng {now.month} năm {now.year}"
+        time_str = now.strftime("%H:%M")
+        return (f"🕒 Hiện tại là **{time_str}** - **{day_str}** nhé!\n\n"
+                f"Một ngày tuyệt vời để ăn vặt đúng không nào? Bạn xem các món bán chạy của shop nhé! 😊")
+
+    # ── THỜI TIẾT ─────────────────────────────────────────────
+    if intent == 'thoi_tiet':
+        return ("🌤️ **Thời tiết hôm nay:**\n\n"
+                "Mimi không có máy đo nhiệt độ ở chỗ bạn, nhưng dù mưa hay nắng thì nằm nhà lướt shop chọn đồ ăn vặt là chuẩn bài nhất đó! 😋\n\n"
+                "Bạn có muốn xem các món đang SALE không?")
+
+    # ── KHEN NGỢI ─────────────────────────────────────────────
+    if intent == 'khen_ngoi':
+        return ("🥰 Cảm ơn bạn nhiều nha!!! Mình vui lắm khi nghe điều đó.\n\n"
+                "Ba Anh Em Shop luôn cố gắng mang đến cho khách hàng trải nghiệm tốt nhất và những món ăn vặt ngon nhất. Cần gì bạn cứ gọi mình nha! ❤️")
+
+    # ── PHÀN NÀN ──────────────────────────────────────────────
+    if intent == 'phan_nan':
+        return ("🥺 Mình xin lỗi nếu đã làm bạn không hài lòng hoặc chưa trả lời đúng ý bạn.\n\n"
+                "Mimi vẫn đang trong quá trình học hỏi để thông minh hơn mỗi ngày. Nếu có vấn đề gấp, bạn gọi **Hotline 0357635270 / 0987178578** hoặc nhắn qua Fanpage nha! Shop sẽ giải quyết cho bạn liền.")
+
+    # ── ĐỔI TRẢ ───────────────────────────────────────────────
+    if intent == 'doi_tra':
+        return ("🔄 **Chính sách đổi trả & bảo hành:**\n\n"
+                "✔️ Shop cam kết **1 đổi 1** hoặc hoàn tiền 100% nếu sản phẩm bị lỗi, hỏng hóc do vận chuyển, hoặc không đúng mô tả.\n"
+                "✔️ Thời gian hỗ trợ: Trong vòng **3 ngày** kể từ khi nhận hàng.\n\n"
+                "Nếu đơn hàng của bạn gặp vấn đề, vui lòng gọi **0357635270 / 0987178578** để được hỗ trợ ngay lập tức nhé! 📞")
+
+    # ── THÀNH PHẦN SẢN PHẨM ───────────────────────────────────
+    if intent == 'thanh_phan':
+        return ("🌿 **Thành phần & Dinh dưỡng:**\n\n"
+                "Mỗi món ở shop đều có mô tả chi tiết ở trang sản phẩm nhé. Phần lớn các món bánh tráng, rong biển... đều dùng nguyên liệu sạch, an toàn.\n"
+                "Nếu bạn ăn chay, ăn kiêng hoặc sợ cay, hãy xem kĩ tên và mô tả sản phẩm nhé! 😋")
+
+    # ── BẢO QUẢN ──────────────────────────────────────────────
+    if intent == 'bao_quan':
+        return ("🧊 **Cách bảo quản đồ ăn vặt:**\n\n"
+                "• Các loại khô, bánh tráng: Để nơi thoáng mát, buộc kín miệng túi sau khi ăn.\n"
+                "• Các loại dẻo, có nước xốt: Nên bảo quản trong ngăn mát tủ lạnh để giữ độ ngon và hạn sử dụng lâu hơn nhé! 😉")
+
+    # ── HẠN SỬ DỤNG ───────────────────────────────────────────
+    if intent == 'hsd':
+        return ("⏳ **Hạn sử dụng (Date):**\n\n"
+                "Hàng của Ba Anh Em Shop luôn là hàng mới nhập liên tục. Đa số HSD từ 3 - 6 tháng kể từ ngày sản xuất.\n"
+                "Bạn cứ yên tâm mua sắm, nhận hàng thấy cận date shop hoàn tiền liền! 💯")
+
+    # ── SỈ / ĐẠI LÝ ───────────────────────────────────────────
+    if intent == 'si_le':
+        return ("🤝 **Chính sách Mua sỉ / Đại lý:**\n\n"
+                "Ba Anh Em Shop luôn chào đón khách sỉ với mức chiết khấu cực kì ưu đãi! 🤑\n"
+                "Vui lòng liên hệ trực tiếp Zalo / SĐT: **0357635270 / 0987178578** để trao đổi bảng giá sỉ chi tiết nha.")
+
+    # ── GIAO NHANH HỎA TỐC ────────────────────────────────────
+    if intent == 'giao_nhanh':
+        return ("🚀 **Giao hàng Hỏa Tốc:**\n\n"
+                "Đang đói mà chờ lâu là bực lắm đúng không? 😤\n"
+                "Nếu bạn ở nội thành và cần gấp, shop có hỗ trợ book Grab/Ahamove. Vui lòng gọi ngay Hotline **0357635270 / 0987178578** để shop ưu tiên xử lý đơn ngay lập tức!")
 
     # ── TÌM KIẾM SẢN PHẨM THÔNG MINH ────────────────────────
     # Tách từ khóa từ tin nhắn GỐC (giữ dấu) → tìm DB bằng icontains
