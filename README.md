@@ -148,15 +148,15 @@ Mở trình duyệt: **http://127.0.0.1:8000**
 
 | URL | Mô tả |
 |---|---|
-| `/` | Trang chủ — danh sách sản phẩm |
-| `/product/<id>/` | Chi tiết sản phẩm |
-| `/cart/` | Giỏ hàng |
-| `/orders/checkout/` | Thanh toán |
-| `/orders/history/` | Lịch sử đơn hàng |
-| `/accounts/register/` | Đăng ký |
-| `/accounts/login/` | Đăng nhập |
-| `/accounts/profile/` | Hồ sơ cá nhân |
-| `/dashboard/` | Admin — Dashboard thống kê |
+| `nguyenducthang.id.vn/` | Trang chủ — danh sách sản phẩm |
+| `nguyenducthang.id.vn/product/id/` | Chi tiết sản phẩm |
+| `nguyenducthang.id.vn/cart/` | Giỏ hàng |
+| `nguyenducthang.id.vn/orders/checkout/` | Thanh toán |
+| `nguyenducthang.id.vn/orders/history/` | Lịch sử đơn hàng |
+| `nguyenducthang.id.vn/accounts/register/` | Đăng ký |
+| `nguyenducthang.id.vn/accounts/login/` | Đăng nhập |
+| `nguyenducthang.id.vn/accounts/profile/` | Hồ sơ cá nhân |
+| `nguyenducthang.id.vn/dashboard/` | Admin — Dashboard thống kê |
 
 ---
 
