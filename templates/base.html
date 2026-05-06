@@ -73,9 +73,14 @@
             display: flex;
             align-items: center;
         }
-        .shopee-logo i {
-            font-size: 40px;
-            margin-right: 10px;
+        .shopee-logo img {
+            height: 48px;
+            margin-right: 12px;
+            transition: transform 0.2s;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+        .shopee-logo img:hover {
+            transform: scale(1.08);
         }
         
         .search-container {
@@ -430,9 +435,9 @@
                 white-space: nowrap;
                 flex-shrink: 0;
             }
-            .shopee-logo i {
-                font-size: 20px;
-                margin-right: 5px;
+            .shopee-logo img {
+                height: 28px;
+                margin-right: 6px;
             }
 
             /* Search bar gọn hơn */
@@ -492,10 +497,14 @@
     <!-- Main Navbar -->
     <div class="navbar-main">
         <div class="container d-flex align-items-center justify-content-between">
-            <a href="{% url 'products:product_list' %}" class="shopee-logo">
-                <i class="fa-solid fa-bag-shopping"></i>
-                <span class="fw-bold">Ba Anh Em Shop</span>
-            </a>
+            <div class="shopee-logo">
+                <a href="https://ictu.edu.vn/" target="_blank" title="Trường ĐH Công nghệ Thông tin & Truyền thông">
+                    <img src="https://ictu.edu.vn/wp-content/uploads/2023/02/cropped-logoww.png" alt="ICTU Logo">
+                </a>
+                <a href="{% url 'products:product_list' %}" class="text-white text-decoration-none">
+                    <span class="fw-bold">Ba Anh Em Shop</span>
+                </a>
+            </div>
             
             <form action="{% url 'products:product_list' %}" method="get" class="search-container">
                 <input type="text" name="q" placeholder="Tìm kiếm đồ ăn vặt..." value="{{ request.GET.q }}">
